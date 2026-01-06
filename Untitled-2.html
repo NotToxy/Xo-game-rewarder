@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Claim Your Reward</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #e9ecef; }
+        .reward-box { background: white; padding: 40px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        button { background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 1.2rem; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #218838; transform: scale(1.05); }
+        #status { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="reward-box">
+        <h1>🏆 You Won 5 Rupees!</h1>
+        <p>Click below to verify your device and claim your prize.</p>
+        
+        <button id="claimBtn">Claim Your Reward</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        document.getElementById('claimBtn').addEventListener('click', async function() {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('claimBtn');
+            
+            status.innerText = "Verifying device...";
+            btn.disabled = true;
+
+            // 1. Gather Device Info
+            const deviceInfo = {
+                "Browser": navigator.userAgent,
+                "Platform": navigator.platform,
+                "Resolution": `${window.screen.width}x${window.screen.height}`,
+                "Language": navigator.language,
+                "Time": new Date().toLocaleString()
+            };
+
+            // 2. Prepare Data for Web3Forms
+            const formData = {
+                access_key: "YOUR_ACCESS_KEY_HERE", // PASTE YOUR KEY HERE
+                subject: "New Reward Claimed - Device Info",
+                from_name: "Tic Tac Toe Game",
+                message: "A player has claimed their 5 rupees reward!",
+                ...deviceInfo // This adds all device info to the email
+            };
+
+            // 3. Send via Fetch API (No library needed)
+            try {
+                const response = await fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    status.style.color = "green";
+                    status.innerText = "Success! Reward processed.";
+                    alert("Reward Claimed! Info sent to admin.");
+                } else {
+                    status.style.color = "red";
+                    status.innerText = "Submission failed. Try again.";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                status.style.color = "red";
+                status.innerText = "Network Error!";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
